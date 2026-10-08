@@ -2,6 +2,8 @@
 using La_Colectiva.Services.Api.Impl;
 using La_Colectiva.Services.Classic;
 using La_Colectiva.Services.Classic.Impl;
+using La_Colectiva.Services.Queries;
+using La_Colectiva.Services.Queries.Impl;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -54,6 +56,7 @@ namespace La_Colectiva
             services.AddSingleton<ApiService, ApiServiceImpl>();
             services.AddSingleton<AuthService, AuthServiceImpl>();
             services.AddSingleton<DockService, DockServiceImpl>();
+            services.AddSingleton<TripService, TripServiceImpl>();
 
             // 2. Registrar ViewModel inyectando la API
             // services.AddTransient<MainViewModel>();

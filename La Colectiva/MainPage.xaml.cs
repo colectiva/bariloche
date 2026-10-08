@@ -2,6 +2,7 @@
 using La_Colectiva.Models.Classic;
 using La_Colectiva.Services.Classic;
 using La_Colectiva.Views.Dialogs;
+using La_Colectiva.Views.Pages;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -99,6 +100,21 @@ namespace La_Colectiva
         private async void FromDockBtn_Click(object sender, RoutedEventArgs e)
         {
             await OpenDockSelectorAsync(dock => From = dock);
+        }
+
+        private void SearchTrips()
+        {
+            if (From == null || To == null)
+            {
+                return;
+            }
+            
+            Frame.Navigate(typeof(NextTripPage), Tuple.Create(From, To));
+        }
+
+        private void SearchNextTrip_Click(object sender, RoutedEventArgs e)
+        {
+            SearchTrips();
         }
     }
 }
