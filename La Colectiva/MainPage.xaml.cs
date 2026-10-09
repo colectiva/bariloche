@@ -1,6 +1,9 @@
 ﻿using La_Colectiva.Core;
 using La_Colectiva.Models.Classic;
+using La_Colectiva.Models.Queries;
 using La_Colectiva.Services.Classic;
+using La_Colectiva.Services.Local;
+using La_Colectiva.Services.Queries;
 using La_Colectiva.Views.Dialogs;
 using La_Colectiva.Views.Pages;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,15 +30,31 @@ namespace La_Colectiva
     /// </summary>
     public sealed partial class MainPage : Page
     {
+
         private readonly DockService _dockService;
+        private readonly TripService _tripService = App.Current.Services.GetRequiredService<TripService>();
+        private readonly TripReminderService _trs = App.Current.Services.GetRequiredService<TripReminderService>();
+
         private bool _isDialogOpen = false;
+
+        private bool _isLoading = false;
+        public bool Loading {
+            get => _isLoading;
+            set {
+                _isLoading = value;
+                if(value) {
+                    this.LoadingProgress.Visibility = Visibility.Visible;
+                } else {
+                    this.LoadingProgress.Visibility = Visibility.Collapsed;
+                }
+            }
+        }
 
         private Dock _from = null;
         public Dock From {
             get { return _from;  }
             set {
                 _from = value;
-                FromDockTextBox.Text = value == null ? "Ningún muelle seleccionado" : value.Name;
             }
         }
 
@@ -44,77 +63,133 @@ namespace La_Colectiva
             get { return _to; }
             set {
                 _to = value;
-                ToDockTextBox.Text = value == null ? "Ningún muelle seleccionado" : value.Name;
+            }
+        }
+
+
+        private DateTimeOffset? _date = DateTimeOffset.Now;
+        public DateTimeOffset? Date {
+            get => _date;
+            set {
+                _date = value;
+                if (From != null && To != null)
+                {
+                    _ = EjecutarBusqueda();
+                }
+            }
+        }
+
+        private TimeSpan? _time = DateTime.Now.TimeOfDay;
+        public TimeSpan? Time {
+            get => _time;
+            set {
+                _time = value;
+                if (From != null && To != null)
+                {
+                    _ = EjecutarBusqueda();
+                }
+            }
+        }
+
+        private async Task EjecutarBusqueda()
+        {
+            Loading = true;
+            var selectedDate = Date?.DateTime ?? DateTime.Now.Date;
+            var selectedTime = Time ?? DateTime.Now.TimeOfDay;
+            var request = new NextTripRequest
+            {
+                OriginId = From.Id,
+                DestinationId = To.Id,
+                Date = selectedDate,
+                Time = selectedTime,
+                Weekday = GetWeekday(selectedDate.DayOfWeek)
+            };
+
+            await _tripService
+                .FindNextTrip(request)
+                .Ok(result =>
+                {
+                    LstTrips.ItemsSource = result;
+                    Loading = false;
+                })
+                .RunAsync();
+
+            Loading = false;
+
+        }
+
+        private char GetWeekday(DayOfWeek day)
+        {
+            switch (day)
+            {
+                case DayOfWeek.Monday: return 'L';
+                case DayOfWeek.Tuesday: return 'M';
+                case DayOfWeek.Wednesday: return 'X';
+                case DayOfWeek.Thursday: return 'J';
+                case DayOfWeek.Friday: return 'V';
+                case DayOfWeek.Saturday: return 'S';
+                case DayOfWeek.Sunday: return 'D';
+                default: return 'L';
             }
         }
 
         public MainPage()
         {
             this.InitializeComponent();
-            
+            DataContext = this;
             _dockService = App.Current.Services.GetRequiredService<DockService>();
+            Loading = false;
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
         }
+        
 
-        private async Task OpenDockSelectorAsync(Action<Dock> onSelected)
-        {
-            if (_isDialogOpen) return;
-            _isDialogOpen = true;
-
-            try
-            {
-                double lat = -34.4258;
-                double lon = -58.5796;
-
-                // Obtiene ubicación con máximo 3 segundos de espera
-                var pos = await LocationHelper.GetCurrentLocationAsync(timeoutSeconds: 3);
-                if (pos.HasValue)
-                {
-                    lat = pos.Value.Latitude;
-                    lon = pos.Value.Longitude;
-                }
-
-                var dialog = new DockSelectorDialog(lat, lon);
-                var result = await dialog.ShowAsync();
-
-                if (result == ContentDialogResult.Primary && dialog.SelectedDock != null)
-                {
-                    onSelected(dialog.SelectedDock);
-                }
-            }
-            finally
-            {
-                _isDialogOpen = false; // Libera el bloqueo al cerrar
-            }
-        }
-
-        private async void ToDockBtn_Click(object sender, RoutedEventArgs e)
-        {
-            await OpenDockSelectorAsync(dock => To = dock);
-        }
-
-        private async void FromDockBtn_Click(object sender, RoutedEventArgs e)
-        {
-            await OpenDockSelectorAsync(dock => From = dock);
-        }
-
-        private void SearchTrips()
+        private async void SearchTrips()
         {
             if (From == null || To == null)
             {
                 return;
             }
-            
-            Frame.Navigate(typeof(NextTripPage), Tuple.Create(From, To));
+
+            await EjecutarBusqueda();
         }
 
         private void SearchNextTrip_Click(object sender, RoutedEventArgs e)
         {
             SearchTrips();
+        }
+
+        private void LstTrips_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (LstTrips.SelectedItem is NextTrip selectedTrip)
+            {
+                NotifyMeBtn.Visibility = Visibility.Visible;
+            } else
+            {
+                NotifyMeBtn.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void SwitchDocks_Click(object sender, RoutedEventArgs e)
+        {
+            var __from = From;
+            var __to = To;
+            From = __to;
+            To = __from;
+            this.Bindings.Update();
+            SearchTrips();
+        }
+
+        // Avisarme
+        private void AppBarButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (LstTrips.SelectedItem is NextTrip selectedTrip)
+            {
+                _trs.SaveAndScheduleReminder(selectedTrip, Date?.DateTime ?? DateTime.Now.Date);
+            }
         }
     }
 }

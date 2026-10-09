@@ -1,0 +1,66 @@
+﻿<Page
+    x:Class="La_Colectiva.Views.Pages.ShellPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:La_Colectiva.Views.Pages"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    xmlns:pages="using:La_Colectiva.Views.Pages">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Barra superior con botón hamburguesa -->
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header superior con botón hamburguesa -->
+        <StackPanel Orientation="Horizontal" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}">
+            <Button x:Name="HamburgerButton" 
+                    FontFamily="Segoe MDL2 Assets" 
+                    Content="&#xE700;" 
+                    FontSize="20" 
+                    Width="48" Height="48" 
+                    Click="HamburgerButton_Click" 
+                    Background="Transparent"/>
+            <TextBlock Text="La Colectiva" VerticalAlignment="Center" FontSize="16" Margin="12,0,0,0"/>
+        </StackPanel>
+
+        <!-- SplitView Principal -->
+        <SplitView x:Name="MySplitView" 
+                   Grid.Row="1"
+                   DisplayMode="Overlay" 
+                   CompactPaneLength="48" 
+                   OpenPaneLength="240" 
+                   IsPaneOpen="False">
+
+            <SplitView.Pane>
+                <ListBox x:Name="NavListBox" SelectionChanged="NavListBox_SelectionChanged">
+                    <ListBoxItem x:Name="NavHome" Tag="MainPage">
+                        <StackPanel Orientation="Horizontal" Padding="5,4">
+                            <SymbolIcon Symbol="Find" Margin="0,0,15,0"/>
+                            <TextBlock Text="Próxima lancha" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem x:Name="NavNS" Tag="NetworkStationsPage">
+                        <StackPanel Orientation="Horizontal" Padding="5,4">
+                            <SymbolIcon Symbol="List" Margin="0,0,15,0"/>
+                            <TextBlock Text="Estaciones hidrológicas" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem x:Name="NavDock" Tag="OfflineDocksPage">
+                        <StackPanel Orientation="Horizontal" Padding="5,4">
+                            <SymbolIcon Symbol="Document" Margin="0,0,15,0"/>
+                            <TextBlock Text="Muelles guardados" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ListBoxItem>
+                </ListBox>
+            </SplitView.Pane>
+
+            <!-- Contenido Principal -->
+            <SplitView.Content>
+                <Frame HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" x:Name="ContentFrame"/>
+            </SplitView.Content>
+        </SplitView>
+    </Grid>
+</Page>

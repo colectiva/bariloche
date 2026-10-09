@@ -2,8 +2,13 @@
 using La_Colectiva.Services.Api.Impl;
 using La_Colectiva.Services.Classic;
 using La_Colectiva.Services.Classic.Impl;
+using La_Colectiva.Services.Local;
+using La_Colectiva.Services.Local.Databases;
+using La_Colectiva.Services.Local.Databases.Impl;
+using La_Colectiva.Services.Local.Impl;
 using La_Colectiva.Services.Queries;
 using La_Colectiva.Services.Queries.Impl;
+using La_Colectiva.Views.Pages;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -57,6 +62,16 @@ namespace La_Colectiva
             services.AddSingleton<AuthService, AuthServiceImpl>();
             services.AddSingleton<DockService, DockServiceImpl>();
             services.AddSingleton<TripService, TripServiceImpl>();
+            services.AddSingleton<TideService, TideServiceImpl>();
+            services.AddSingleton<NetworkStationService, NetworkStationServiceImpl>();
+
+            services.AddSingleton<DatabaseService, DatabaseServiceImpl>();
+
+            services.AddSingleton<ViaRepository, ViaRepositoryImpl>();
+            services.AddSingleton<DockRepository, DockRepositoryImpl>();
+
+            services.AddSingleton<TripReminderService, TripReminderServiceImpl>();
+            services.AddSingleton<TileService, TileServiceImpl>();
 
             // 2. Registrar ViewModel inyectando la API
             // services.AddTransient<MainViewModel>();
@@ -99,7 +114,7 @@ namespace La_Colectiva
                     // When the navigation stack isn't restored navigate to the first page,
                     // configuring the new page by passing required information as a navigation
                     // parameter
-                    rootFrame.Navigate(typeof(MainPage), e.Arguments);
+                    rootFrame.Navigate(typeof(ShellPage), e.Arguments);
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();

@@ -9,7 +9,7 @@ namespace La_Colectiva.Core
 {
     public static class LocationHelper
     {
-        public static async Task<BasicGeoposition?> GetCurrentLocationAsync(uint timeoutSeconds = 3)
+        public static async Task<BasicGeoposition?> GetCurrentLocationAsync(uint timeoutSeconds = 10)
         {
             try
             {
@@ -24,7 +24,7 @@ namespace La_Colectiva.Core
 
                 // Usa ubicación en caché si tiene menos de 5 min, o busca por máximo 'timeoutSeconds'
                 Geoposition position = await geolocator.GetGeopositionAsync(
-                    maximumAge: TimeSpan.FromMinutes(5),
+                    maximumAge: TimeSpan.FromMinutes(10),
                     timeout: TimeSpan.FromSeconds(timeoutSeconds)
                 );
 

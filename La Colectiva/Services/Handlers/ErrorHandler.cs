@@ -57,7 +57,13 @@ namespace La_Colectiva.Services.Handlers
                         : template.With(fatalError).GetLocalError();
 
                     var window = new ErrorWindow(fatalError, data);
-                    await window.ShowAsync();
+                    try
+                    {
+                        await window.ShowAsync();
+                    } catch (Exception e)
+                    {
+                        // Do nothing
+                    }
                 });
             };
         }

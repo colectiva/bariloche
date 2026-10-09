@@ -3,5 +3,39 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:La_Colectiva">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
 
+                <ResourceDictionary x:Key="Light">
+                    <!-- CONFIRMED -->
+                    <Color x:Key="StatusConfirmedColor">#2962ff</Color>
+                    <SolidColorBrush x:Key="StatusConfirmedBrush" Color="{StaticResource StatusConfirmedColor}"/>
+
+                    <!-- CANCELLED -->
+                    <Color x:Key="StatusCancelledColor">#C62828</Color>
+                    <SolidColorBrush x:Key="StatusCancelledBrush" Color="{StaticResource StatusCancelledColor}"/>
+
+                    <!-- WARNING -->
+                    <Color x:Key="StatusWarningColor">#ffd600</Color>
+                    <SolidColorBrush x:Key="StatusWarningBrush" Color="{StaticResource StatusWarningColor}"/>
+                </ResourceDictionary>
+
+                <ResourceDictionary x:Key="Dark">
+                    <!-- CONFIRMED -->
+                    <Color x:Key="StatusConfirmedColor">#2979ff</Color>
+                    <SolidColorBrush x:Key="StatusConfirmedBrush" Color="{StaticResource StatusConfirmedColor}"/>
+
+                    <!-- CANCELLED -->
+                    <Color x:Key="StatusCancelledColor">#ff1744</Color>
+                    <SolidColorBrush x:Key="StatusCancelledBrush" Color="{StaticResource StatusCancelledColor}"/>
+
+                    <!-- WARNING -->
+                    <Color x:Key="StatusWarningColor">#ffea00</Color>
+                    <SolidColorBrush x:Key="StatusWarningBrush" Color="{StaticResource StatusWarningColor}"/>
+                </ResourceDictionary>
+
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
 </Application>

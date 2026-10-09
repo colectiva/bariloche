@@ -6,57 +6,78 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Title="Seleccionar Muelle"
     PrimaryButtonText="Aceptar"
     SecondaryButtonText="Cancelar"
     IsPrimaryButtonEnabled="False"
-    Padding="0,12,0,0"
+    Padding="0,0,0,0"
+    FullSizeDesired="True"
+    HorizontalAlignment="Stretch"
+    VerticalAlignment="Stretch"
     PrimaryButtonClick="ContentDialog_PrimaryButtonClick">
+    <ContentDialog.Resources>
+        <!-- Plantilla compartida para ambas listas -->
+        <DataTemplate x:Key="DockItemTemplate">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
 
-    <Grid Margin="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
+                <TextBlock Grid.Column="0" Grid.Row="0" Text="{Binding Name}" FontWeight="SemiBold" FontSize="16"/>
+                <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding PrettyDistance}" VerticalAlignment="Center" Foreground="Gray" FontSize="12"/>
+                <TextBlock Grid.ColumnSpan="2" Grid.Row="1" Text="{Binding Via.PrettyName}" FontSize="12" Foreground="Gray"/>
+            </Grid>
+        </DataTemplate>
+    </ContentDialog.Resources>
 
-        <ProgressRing x:Name="progressRing" IsActive="True" Grid.Row="0" Margin="0,0,0,10" HorizontalAlignment="Center"/>
+    <Pivot x:Name="MainPivot" Margin="0,5,0,0" SelectionChanged="MainPivot_SelectionChanged">
+        <!-- Pestaña 1: Búsqueda -->
+        <PivotItem Header="Buscar">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-        <ListView x:Name="lstDocks" Grid.Row="1" MaxHeight="320" HorizontalAlignment="Stretch"
-                  VerticalAlignment="Stretch"
-                  SelectionChanged="lstDocks_SelectionChanged">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
-                    <Setter Property="Padding" Value="12,8"/>
-                </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.ItemTemplate>
-                <DataTemplate >
-                    <Grid >
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
+                <TextBox x:Name="qTxt" Grid.Row="0" Text="{Binding Q, Mode=TwoWay}" PlaceholderText="Buscar muelles y puntos..." TextChanged="QTxt_TextChanged" Margin="0,0,0,10" />
+                <ProgressRing x:Name="progressRing" Visibility="Collapsed" Grid.Row="1" HorizontalAlignment="Center"/>
 
-                        <TextBlock Grid.Column="0" Grid.Row="0" Text="{Binding Name}" FontWeight="SemiBold" FontSize="16"/>
-                        <TextBlock Grid.Column="1" Grid.Row="0" Text="{Binding PrettyDistance}" VerticalAlignment="Center" Foreground="Gray" FontSize="12"/>
-                        <TextBlock Grid.ColumnSpan="2" Grid.Row="1" Text="{Binding Via.PrettyName}" FontSize="12" Foreground="Gray"/>
-                    </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
+                <ListView x:Name="lstDocks" Grid.Row="1" ItemTemplate="{StaticResource DockItemTemplate}" SelectionChanged="lstDocks_SelectionChanged">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.Footer>
+                        <Button x:Name="btnLoadMore" Content="Cargar más" HorizontalAlignment="Stretch" Margin="0,5,0,0" Visibility="Collapsed" Click="btnLoadMore_Click"/>
+                    </ListView.Footer>
+                </ListView>
 
-            <ListView.Footer>
-                <Button x:Name="btnLoadMore" Content="Cargar más" 
-                        HorizontalAlignment="Stretch" Margin="0,5,0,0" 
-                        Visibility="Collapsed" Click="btnLoadMore_Click"/>
-            </ListView.Footer>
-        </ListView>
+                <TextBlock x:Name="txtEmpty" Text="No se encontraron muelles." Grid.Row="1" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </PivotItem>
 
-        <TextBlock x:Name="txtEmpty" Text="No se encontraron muelles." Grid.Row="1" 
-                   Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-    </Grid>
+        <!-- Pestaña 2: Favoritos -->
+        <PivotItem Header="Favoritos">
+            <Grid>
+                <ProgressRing x:Name="progressRingFavorites" Visibility="Collapsed" HorizontalAlignment="Center"/>
+
+                <ListView x:Name="lstFavorites" ItemTemplate="{StaticResource DockItemTemplate}" SelectionChanged="lstFavorites_SelectionChanged">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                            <Setter Property="Padding" Value="12,8"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
+
+                <TextBlock x:Name="txtEmptyFavorites" Text="No tenés muelles en favoritos." Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Grid>
+        </PivotItem>
+    </Pivot>
 </ContentDialog>

@@ -1,6 +1,9 @@
 ﻿using La_Colectiva.Core;
+using La_Colectiva.Models.Api;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using SQLite;
+using SQLiteNetExtensions.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,9 +21,22 @@ namespace La_Colectiva.Models.Classic
         BUSINESS,
         REFERENCE
     }
+    
+    [Table("BookmarkDocks")]
+    public class BookmarkDockDto
+    {
+        [PrimaryKey]
+        public int DockId { get; set; }
+        public DateTime BookmarkedAt { get; set; } = DateTime.UtcNow;
 
+        [OneToOne(CascadeOperations = CascadeOperation.CascadeRead)]
+        public DockDto Dock { get; set; }
+    }
+
+    [Table("Docks")]
     public class DockDto
     {
+        [PrimaryKey]
         public int Id { get; set; }
         public string Name { get; set; }
         [JsonConverter(typeof(DoubleOrStringConverter))]
@@ -32,6 +48,12 @@ namespace La_Colectiva.Models.Classic
         [JsonProperty("distance")]
         public double? Distance { get; set; }
 
+        //[JsonIgnore]
+        [JsonProperty("viaId")]
+        [ForeignKey(typeof(ViaDto))]
+        public int ViaId { get; set; }
+
+        [ManyToOne(CascadeOperations = CascadeOperation.CascadeRead)]
         [JsonProperty("via")]
         public ViaDto Via { get; set; }
 
@@ -41,6 +63,10 @@ namespace La_Colectiva.Models.Classic
         public DateTime UpdatedAt { get; set; }
         [JsonProperty("type")]
         public DockType Type { get; set; }
+        [JsonIgnore]
+        public DateTime SavedAt { get; set; }
+        [Ignore]
+        public bool IsBookmarked { get; set; }
 
     }
 
@@ -62,6 +88,9 @@ namespace La_Colectiva.Models.Classic
         [JsonProperty("updated_at")]
         public DateTime UpdatedAt { get; set; }
         public DockType Type { get; set; }
+        public DateTime SavedAt { get; set; }
+        [Ignore]
+        public bool IsBookmarked { get; set; }
 
         public string PrettyDistance {
             get {
@@ -72,6 +101,7 @@ namespace La_Colectiva.Models.Classic
                 return "";
             }
         }
+
 
         public Dock() { }
 
@@ -86,7 +116,9 @@ namespace La_Colectiva.Models.Classic
                 Via = new Via(raw.Via),
                 Distance = new Distance(raw.Distance),
                 UpdatedAt = raw.UpdatedAt,
-                Type = raw.Type
+                Type = raw.Type,
+                SavedAt = raw.SavedAt,
+                IsBookmarked = raw.IsBookmarked
             };
         }
     }
@@ -124,8 +156,9 @@ namespace La_Colectiva.Models.Classic
     }
 
 
-    public class EmbeddedDocks
+    public class EmbeddedDocks : IEmbedded<DockDto>
     {
-        public List<DockDto> Docks { get; set; }
+        [JsonProperty("docks")]
+        public List<DockDto> Items { get; set; }
     }
 }

@@ -134,12 +134,16 @@
     </Compile>
     <Compile Include="Models\Api\Api.cs" />
     <Compile Include="Models\Api\ApiRequest.cs" />
+    <Compile Include="Models\Api\Paginator.cs" />
     <Compile Include="Models\Classic\Branch.cs" />
     <Compile Include="Models\Classic\Company.cs" />
     <Compile Include="Models\Classic\DailyOperation.cs" />
     <Compile Include="Models\Classic\Dock.cs" />
+    <Compile Include="Models\Classic\NetworkSource.cs" />
+    <Compile Include="Models\Classic\NetworkStation.cs" />
     <Compile Include="Models\Classic\Route.cs" />
     <Compile Include="Models\Classic\Schedule.cs" />
+    <Compile Include="Models\Classic\Tide.cs" />
     <Compile Include="Models\Classic\Via.cs" />
     <Compile Include="Models\Queries\NextTrip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -149,11 +153,32 @@
     <Compile Include="Services\Api\Impl\AuthServiceImpl.cs" />
     <Compile Include="Services\Classic\DockService.cs" />
     <Compile Include="Services\Classic\Impl\DockServiceImpl.cs" />
+    <Compile Include="Services\Classic\Impl\NetworkStationServiceImpl.cs" />
+    <Compile Include="Services\Classic\Impl\TideServiceImpl.cs" />
+    <Compile Include="Services\Classic\NetworkStationService.cs" />
+    <Compile Include="Services\Classic\TideService.cs" />
     <Compile Include="Services\Handlers\ErrorHandler.cs" />
     <Compile Include="Services\Handlers\HttpErrorTemplate.cs" />
+    <Compile Include="Services\Local\Databases\DatabaseService.cs" />
+    <Compile Include="Services\Local\Databases\DockRepository.cs" />
+    <Compile Include="Services\Local\Databases\Impl\DatabaseServiceImpl.cs" />
+    <Compile Include="Services\Local\Databases\Impl\DockRepositoryImpl.cs" />
+    <Compile Include="Services\Local\Databases\Impl\ViaRepositoryImpl.cs" />
+    <Compile Include="Services\Local\Databases\LocalRepository.cs" />
+    <Compile Include="Services\Local\Databases\ViaRepository.cs" />
+    <Compile Include="Services\Local\Impl\TileServiceImpl.cs" />
+    <Compile Include="Services\Local\Impl\TripReminderServiceImpl.cs" />
+    <Compile Include="Services\Local\TileService.cs" />
+    <Compile Include="Services\Local\TripReminderService.cs" />
     <Compile Include="Services\Queries\Impl\TripServiceImpl.cs" />
     <Compile Include="Services\Queries\TripService.cs" />
     <Compile Include="ViewModels\Design\NextTripMockViewModel.cs" />
+    <Compile Include="Views\Controls\DateTimePickerControl.xaml.cs">
+      <DependentUpon>DateTimePickerControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Controls\DockSelector.xaml.cs">
+      <DependentUpon>DockSelector.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Converters\NullToVisibilityConverter.cs" />
     <Compile Include="Views\Converters\OperationStatusConverter.cs" />
     <Compile Include="Views\Converters\RouteStatusConverter.cs" />
@@ -164,8 +189,20 @@
     <Compile Include="Views\Dialogs\ErrorWindow.xaml.cs">
       <DependentUpon>ErrorWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Pages\NetworkStationsPage.xaml.cs">
+      <DependentUpon>NetworkStationsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Pages\NetworkStationTidePage.xaml.cs">
+      <DependentUpon>NetworkStationTidePage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Pages\NextTripPage.xaml.cs">
       <DependentUpon>NextTripPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Pages\OfflineManager\DockRepositoryManager.xaml.cs">
+      <DependentUpon>DockRepositoryManager.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Pages\ShellPage.xaml.cs">
+      <DependentUpon>ShellPage.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -175,13 +212,57 @@
     <None Include="La Colectiva_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Assets\BadgeLogo.scale-100.png" />
+    <Content Include="Assets\BadgeLogo.scale-125.png" />
+    <Content Include="Assets\BadgeLogo.scale-150.png" />
+    <Content Include="Assets\BadgeLogo.scale-200.png" />
+    <Content Include="Assets\BadgeLogo.scale-400.png" />
+    <Content Include="Assets\LargeTile.scale-100.png" />
+    <Content Include="Assets\LargeTile.scale-125.png" />
+    <Content Include="Assets\LargeTile.scale-150.png" />
+    <Content Include="Assets\LargeTile.scale-200.png" />
+    <Content Include="Assets\LargeTile.scale-400.png" />
+    <Content Include="Assets\SmallTile.scale-100.png" />
+    <Content Include="Assets\SmallTile.scale-125.png" />
+    <Content Include="Assets\SmallTile.scale-150.png" />
+    <Content Include="Assets\SmallTile.scale-200.png" />
+    <Content Include="Assets\SmallTile.scale-400.png" />
+    <Content Include="Assets\SplashScreen.scale-100.png" />
+    <Content Include="Assets\SplashScreen.scale-125.png" />
+    <Content Include="Assets\SplashScreen.scale-150.png" />
+    <Content Include="Assets\SplashScreen.scale-400.png" />
+    <Content Include="Assets\Square150x150Logo.scale-100.png" />
+    <Content Include="Assets\Square150x150Logo.scale-125.png" />
+    <Content Include="Assets\Square150x150Logo.scale-150.png" />
+    <Content Include="Assets\Square150x150Logo.scale-400.png" />
+    <Content Include="Assets\Square44x44Logo.altform-unplated_targetsize-16.png" />
+    <Content Include="Assets\Square44x44Logo.altform-unplated_targetsize-256.png" />
+    <Content Include="Assets\Square44x44Logo.altform-unplated_targetsize-32.png" />
+    <Content Include="Assets\Square44x44Logo.altform-unplated_targetsize-48.png" />
+    <Content Include="Assets\Square44x44Logo.scale-100.png" />
+    <Content Include="Assets\Square44x44Logo.scale-125.png" />
+    <Content Include="Assets\Square44x44Logo.scale-150.png" />
+    <Content Include="Assets\Square44x44Logo.scale-400.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-16.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-24.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-256.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-32.png" />
+    <Content Include="Assets\Square44x44Logo.targetsize-48.png" />
+    <Content Include="Assets\StoreLogo.scale-100.png" />
+    <Content Include="Assets\StoreLogo.scale-125.png" />
+    <Content Include="Assets\StoreLogo.scale-150.png" />
+    <Content Include="Assets\StoreLogo.scale-200.png" />
+    <Content Include="Assets\StoreLogo.scale-400.png" />
+    <Content Include="Assets\Wide310x150Logo.scale-100.png" />
+    <Content Include="Assets\Wide310x150Logo.scale-125.png" />
+    <Content Include="Assets\Wide310x150Logo.scale-150.png" />
+    <Content Include="Assets\Wide310x150Logo.scale-400.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />
     <Content Include="Assets\Square150x150Logo.scale-200.png" />
     <Content Include="Assets\Square44x44Logo.scale-200.png" />
     <Content Include="Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
-    <Content Include="Assets\StoreLogo.png" />
     <Content Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
@@ -193,6 +274,14 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Views\Controls\DateTimePickerControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Controls\DockSelector.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Dialogs\DockSelectorDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -201,7 +290,23 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Pages\NetworkStationsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Pages\NetworkStationTidePage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Pages\NextTripPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Pages\OfflineManager\DockRepositoryManager.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Pages\ShellPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -215,6 +320,15 @@
     </PackageReference>
     <PackageReference Include="Newtonsoft.Json">
       <Version>13.0.4</Version>
+    </PackageReference>
+    <PackageReference Include="sqlite-net-pcl">
+      <Version>1.6.292</Version>
+    </PackageReference>
+    <PackageReference Include="SQLiteNetExtensions.Async">
+      <Version>2.1.0</Version>
+    </PackageReference>
+    <PackageReference Include="Telerik.UI.for.UniversalWindowsPlatform">
+      <Version>1.0.2.11</Version>
     </PackageReference>
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">

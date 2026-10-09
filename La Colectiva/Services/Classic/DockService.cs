@@ -10,6 +10,10 @@ namespace La_Colectiva.Services.Classic
 {
     public interface DockService
     {
+        Task Bookmark(int id);
+        Task DeleteBookmark(int id);
+        Task<List<Dock>> GetBookmarks();
+        ApiRequest<SpringPageRes<EmbeddedDocks>, Page<Dock>> Search(string q, int page, int size);
         ApiRequest<SpringPageRes<EmbeddedDocks>, Page<Dock>> Search(string q, double lat, double lon, int page, int size);
         ApiRequest<SpringPageRes<EmbeddedDocks>, Page<Dock>> FindNearestDocks(double lat, double lon, int count);
     }

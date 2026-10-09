@@ -32,6 +32,8 @@ namespace La_Colectiva.Models.Api
 
         private readonly Func<R, T> _mapper;
 
+        private Func<Task<R>> _offlineFallback;
+
         private Action<T> _onSuccess;
         private Action<HttpStatusCode> _onEmptyResponse;
         private Action<ApiUnprocessableEntityErrorResponse> _onValidationError;
@@ -59,6 +61,24 @@ namespace La_Colectiva.Models.Api
         public ApiRequest<R, T> Authenticate(string token)
         {
             this._token = token;
+            return this;
+        }
+
+        public ApiRequest<R, T> Offline(Func<R> fallback)
+        {
+            if (fallback == null)
+                throw new ArgumentNullException(nameof(fallback));
+
+            _offlineFallback = () => Task.FromResult(fallback());
+            return this;
+        }
+
+        public ApiRequest<R, T> Offline(Func<Task<R>> fallback)
+        {
+            if (fallback == null)
+                throw new ArgumentNullException(nameof(fallback));
+
+            _offlineFallback = fallback;
             return this;
         }
 
@@ -157,6 +177,12 @@ namespace La_Colectiva.Models.Api
             return this;
         }
 
+        public ApiRequest<R, T2> Map<T2>(Func<T, T> firstMapper, Func<T, T2> secondMapper)
+        {
+            return this
+                .Map<T2>((x) => secondMapper(firstMapper(x)));
+        }
+
         public ApiRequest<R, T2> Map<T2>(Func<T, T2> mapper)
         {
             var req = new ApiRequest<R, T2>(
@@ -167,7 +193,8 @@ namespace La_Colectiva.Models.Api
             )
             {
                 Payload = Payload,
-                _log = _log
+                _log = _log,
+                _offlineFallback = this._offlineFallback
             };
             foreach (var q in _query)
             {
@@ -259,8 +286,39 @@ namespace La_Colectiva.Models.Api
                         requestMessage.Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json");
                         if (_log) System.Diagnostics.Debug.WriteLine($"---> Body: {jsonPayload}");
                     }
+                    HttpResponseMessage response;
 
-                    using (var response = await _client.SendAsync(requestMessage, HttpCompletionOption.ResponseHeadersRead, _cancellationToken))
+                    try
+                    {
+                        response = await _client.SendAsync(
+                            requestMessage,
+                            HttpCompletionOption.ResponseHeadersRead,
+                            _cancellationToken);
+                    }
+                    catch (HttpRequestException)
+                    {
+                        if (_offlineFallback == null)
+                            throw;
+
+                        if (_cancellationToken.IsCancellationRequested)
+                            throw;
+
+                        R offlineData = await _offlineFallback();
+
+                        if (offlineData != null)
+                        {
+                            T result = _mapper(offlineData);
+                            _onSuccess?.Invoke(result);
+                        }
+                        else
+                        {
+                            _onEmptyResponse?.Invoke(HttpStatusCode.NoContent);
+                        }
+
+                        return;
+                    }
+
+                    using (response)
                     {
                         string jsonResponse = string.Empty;
                         var totalBytes = response.Content.Headers.ContentLength;
@@ -362,6 +420,46 @@ namespace La_Colectiva.Models.Api
                 _onFatalError?.Invoke(new ApiFatalErrorResponse
                 {
                     Status = null,
+                    Message = ex.GetType().Name,
+                    Error = $"{ex.GetType().Name}: {ex.Message}",
+                    Trace = ex.StackTrace
+                });
+            }
+        }
+
+        public async Task RunOffline()
+        {
+            try
+            {
+                if (_offlineFallback == null)
+                {
+                    throw new InvalidOperationException(
+                        "No se configuró un fallback offline. Usá .Offline() primero.");
+                }
+
+                if (_log)
+                    System.Diagnostics.Debug.WriteLine(
+                        $"---> OFFLINE {Method.Method} {Url}");
+
+                R offlineData = await _offlineFallback();
+
+                if (offlineData == null)
+                {
+                    _onEmptyResponse?.Invoke(HttpStatusCode.NoContent);
+                    return;
+                }
+
+                T result = _mapper(offlineData);
+                _onSuccess?.Invoke(result);
+            }
+            catch (Exception ex)
+            {
+                if (_log)
+                    System.Diagnostics.Debug.WriteLine(
+                        $"<--- ERROR OFFLINE: {ex.Message}");
+
+                _onFatalError?.Invoke(new ApiFatalErrorResponse
+                {
                     Message = ex.GetType().Name,
                     Error = $"{ex.GetType().Name}: {ex.Message}",
                     Trace = ex.StackTrace

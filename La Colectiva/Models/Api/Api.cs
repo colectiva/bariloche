@@ -9,6 +9,11 @@ using System.Threading.Tasks;
 
 namespace La_Colectiva.Models.Api
 {
+    public class EmbbeddedRes<T>
+    {
+        [JsonProperty("_embedded")]
+        public T Data { get; set; }
+    }
 
     public class ErrorWindowData
     {
@@ -100,6 +105,98 @@ namespace La_Colectiva.Models.Api
         {
             return $"PageData {{ Number = {Number}, Size = {Size}, TotalElements = {TotalElements}, TotalPages = {TotalPages} }}";
         }
+    }
+
+    public class PageBuilder<T>
+    {
+        private readonly Page<T> _page = new Page<T>();
+        private readonly PageData _pageData = new PageData();
+
+        public PageBuilder<T> Content(IEnumerable<T> items)
+        {
+            if (items != null)
+            {
+                _page.Content = items.ToList();
+            }
+            return this;
+        }
+
+        public PageBuilder<T> Page(int number)
+        {
+            _pageData.Number = number;
+            return this;
+        }
+
+        public PageBuilder<T> Size(int size)
+        {
+            _pageData.Size = size;
+            return this;
+        }
+
+        public PageBuilder<T> TotalElements(int totalElements)
+        {
+            _pageData.TotalElements = totalElements;
+            return this;
+        }
+
+        public PageBuilder<T> TotalPages(int totalPages)
+        {
+            _pageData.TotalPages = totalPages;
+            return this;
+        }
+
+        public PageBuilder<T> Pageable(PageData pageData)
+        {
+            if (pageData != null)
+            {
+                _pageData.Number = pageData.Number;
+                _pageData.Size = pageData.Size;
+                _pageData.TotalElements = pageData.TotalElements;
+                _pageData.TotalPages = pageData.TotalPages;
+            }
+            return this;
+        }
+
+        public Page<T> Build()
+        {
+            // Auto-calcula páginas totales si no se asignó explícitamente
+            if (_pageData.TotalPages == 0 && _pageData.Size > 0 && _pageData.TotalElements > 0)
+            {
+                _pageData.TotalPages = (int)Math.Ceiling((double)_pageData.TotalElements / _pageData.Size);
+            }
+
+            _page.Pageable = _pageData;
+            return _page;
+        }
+
+        public SpringPageRes<E> BuildSpringPageRes<E>()
+            where E : IEmbedded<T>, new()
+        {
+            var page = Build();
+            var s = new SpringPageRes<E>();
+            s.Page = page.Pageable;
+            s.Embedded = new E();
+            s.Embedded.Items = page.Content;
+            return s;
+        }
+
+        public SpringControlledPageRes<T> BuildSpringControlledPageRes()
+        {
+            var page = Build();
+            var s = new SpringControlledPageRes<T>() {
+                Content = page.Content,
+                Empty = page.Content.Count == 0,
+                First = page.Pageable.Number == 1,
+                Last = page.Pageable.Number == page.Pageable.TotalPages,
+                Number = page.Pageable.Number,
+                NumberOfElements = page.Content.Count,
+                Size = page.Pageable.Size,
+                TotalElements = page.Pageable.TotalElements,
+                TotalPages = page.Pageable.TotalPages
+            };
+            return s;
+        }
+
     }
 
     public class SpringPageRes<E>

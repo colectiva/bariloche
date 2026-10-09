@@ -29,77 +29,11 @@ namespace La_Colectiva.Views.Pages
     /// </summary>
     public partial class NextTripPage : Page
     {
-        private Dock _origin;
-        private Dock _destination;
-        private readonly TripService _tripService;
-
-        // Propiedades de fecha y hora inicializadas con las actuales
-        public DateTime Date { get; set; } = DateTime.Now.Date;
-        public TimeSpan Time { get; set; } = DateTime.Now.Date.TimeOfDay;
-        
 
         public NextTripPage()
         {
             InitializeComponent();
-
-            // Instanciar tu servicio (inyectado o manual según tu app)
-            _tripService = App.Current.Services.GetRequiredService<TripService>();
         }
-
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
-        {
-            base.OnNavigatedTo(e);
-
-            // Suponiendo que pasas ambos muelles al navegar, ej: 
-            // Frame.Navigate(typeof(NextTripPage), new Tuple<Dock, Dock>(dockFrom, dockTo));
-            if (e.Parameter is Tuple<Dock, Dock> docks)
-            {
-                _origin = docks.Item1;
-                _destination = docks.Item2;
-
-                await EjecutarBusqueda();
-            }
-        }
-
-        private async Task EjecutarBusqueda()
-        {
-            var request = new NextTripRequest
-            {
-                OriginId = _origin.Id,
-                DestinationId = _destination.Id,
-                Date = Date,
-                Time = Time,
-                Weekday = GetWeekday(Date.DayOfWeek)
-            };
-            
-            await _tripService
-                .FindNextTrip(request)
-                .Ok(result =>
-                {
-                    LstTrips.ItemsSource = result;
-                })
-                .RunAsync();
-
-        }
-
-        private char GetWeekday(DayOfWeek day)
-        {
-            switch (day)
-            {
-                case DayOfWeek.Monday: return 'L';
-                case DayOfWeek.Tuesday: return 'M';
-                case DayOfWeek.Wednesday: return 'X';
-                case DayOfWeek.Thursday: return 'J';
-                case DayOfWeek.Friday: return 'V';
-                case DayOfWeek.Saturday: return 'S';
-                case DayOfWeek.Sunday: return 'D';
-                default: return 'L';
-            }
-        }
-
-        private void LstTrips_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-
-        }
+        
     }
 }

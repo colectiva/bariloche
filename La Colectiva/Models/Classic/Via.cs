@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -28,10 +29,13 @@ namespace La_Colectiva.Models.Classic
         [Description("Camino de sirga")] WALKWAY,
         [Description("Puente")] BRIDGE
     }
+    
 
+    [Table("Vias")]
     public class ViaDto
     {
 
+        [PrimaryKey]
         public int Id { get; set; }
         public string Name { get; set; }
         [JsonConverter(typeof(StringEnumConverter))]
