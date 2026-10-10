@@ -1,4 +1,5 @@
 ﻿using La_Colectiva.Models.Classic;
+using La_Colectiva.Models.Local;
 using SQLite;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,7 @@ namespace La_Colectiva.Services.Local.Databases.Impl
             await db.CreateTableAsync<DockDto>();
             await db.CreateTableAsync<ViaDto>();
             await db.CreateTableAsync<BookmarkDockDto>();
+            await db.CreateTableAsync<TripShortcutDto>();
         }
         public async Task DropData()
         {
@@ -34,10 +36,12 @@ namespace La_Colectiva.Services.Local.Databases.Impl
             await db.DropTableAsync<DockDto>();
             await db.DropTableAsync<ViaDto>();
             await db.DropTableAsync<BookmarkDockDto>();
+            await db.DropTableAsync<TripShortcutDto>();
 
             await db.CreateTableAsync<DockDto>();
             await db.CreateTableAsync<ViaDto>();
             await db.CreateTableAsync<BookmarkDockDto>();
+            await db.CreateTableAsync<TripShortcutDto>();
 
             return;
         }

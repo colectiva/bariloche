@@ -80,10 +80,7 @@ namespace La_Colectiva.Services.Local.Impl
             {
                 Id = ToastTag
             };
-
-            var toast = new ToastNotification(doc);
-            ToastNotificationManager.CreateToastNotifier().Show(toast);
-
+            
             ToastNotificationManager.CreateToastNotifier().AddToSchedule(scheduledToast);
         }
 

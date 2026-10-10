@@ -69,6 +69,7 @@ namespace La_Colectiva
 
             services.AddSingleton<ViaRepository, ViaRepositoryImpl>();
             services.AddSingleton<DockRepository, DockRepositoryImpl>();
+            services.AddSingleton<TripShortcutRepository, TripShortcutRepositoryImpl>();
 
             services.AddSingleton<TripReminderService, TripReminderServiceImpl>();
             services.AddSingleton<TileService, TileServiceImpl>();
@@ -118,6 +119,41 @@ namespace La_Colectiva
                 }
                 // Ensure the current window is active
                 Window.Current.Activate();
+            }
+        }
+
+        protected override async void OnBackgroundActivated(BackgroundActivatedEventArgs args)
+        {
+            base.OnBackgroundActivated(args);
+            Services = ConfigureServices();
+
+            // Obtenemos un deferral para avisarle a Windows que nuestra tarea es asíncrona
+            // y que no nos mate el proceso hasta que terminemos de descargar los datos.
+            var deferral = args.TaskInstance.GetDeferral();
+
+            try
+            {
+                if (args.TaskInstance.Task.Name == "TideTileUpdateTask")
+                {
+                    // NOTA: Asegurate de que App.Current.Services ya esté inicializado a esta altura.
+                    // Si inicializás tus servicios en "OnLaunched", copialo también al constructor de "App()" 
+                    // o a un método "ConfigureServices()" que corra siempre.
+
+                    var tileService = App.Current.Services.GetRequiredService<TileService>() as TileServiceImpl;
+                    if (tileService != null)
+                    {
+                        await tileService.UpdateTileFromBackgroundAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error en BackgroundTask: {ex.Message}");
+            }
+            finally
+            {
+                // Le avisamos a Windows que terminamos
+                deferral.Complete();
             }
         }
 

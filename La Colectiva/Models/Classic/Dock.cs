@@ -92,6 +92,9 @@ namespace La_Colectiva.Models.Classic
         [Ignore]
         public bool IsBookmarked { get; set; }
 
+        [Ignore, JsonIgnore]
+        public DockDto Raw { get; set; }
+
         public string PrettyDistance {
             get {
                 if(Distance != null)
@@ -109,6 +112,7 @@ namespace La_Colectiva.Models.Classic
         {
             return new Dock
             {
+                Raw = raw,
                 Id = raw.Id,
                 Name = raw.Name,
                 Latitude = raw.Latitude, // Culture.from(raw.Latitude),

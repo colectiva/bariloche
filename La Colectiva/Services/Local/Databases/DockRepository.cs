@@ -13,5 +13,6 @@ namespace La_Colectiva.Services.Local.Databases
         Task AddBookmark(int dockId);
         Task DeleteBookmark(int dockId);
         Task<List<DockDto>> GetBookmarkedDocks();
+        Task PopulateVias(List<DockDto> docks);
     }
 }

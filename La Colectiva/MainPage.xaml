@@ -61,7 +61,7 @@
              HorizontalAlignment="Stretch" 
              VerticalAlignment="Top" 
              Visibility="{Binding Loading, Converter={StaticResource BooleanToVisibilityConverter}}" />
-        <ListBox Grid.Row="2" x:Name="LstTrips" Background="Transparent" Margin="0" HorizontalContentAlignment="Stretch" SelectionChanged="LstTrips_SelectionChanged">
+        <ListBox Grid.Row="2" x:Name="LstTrips" Visibility="Collapsed" Background="Transparent" Margin="0" HorizontalContentAlignment="Stretch" SelectionChanged="LstTrips_SelectionChanged">
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
                     <Setter Property="Background" Value="Transparent"/>
@@ -115,10 +115,79 @@
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
+        <ListView x:Name="TripShortcutListBox" Grid.Row="2"
+          HorizontalAlignment="Stretch" SelectionChanged="TripShortcutListBox_SelectionChanged"
+          VerticalAlignment="Stretch"
+          SelectionMode="Single">
+
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                    <Setter Property="Padding" Value="12,10"/>
+                </Style>
+            </ListView.ItemContainerStyle>
+
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid x:Name="ShortcutGrid">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <!-- Origen (Muelle Desde) -->
+                            <ColumnDefinition Width="*" />
+
+                            <!-- Icono Flecha central -->
+                            <ColumnDefinition Width="Auto" />
+
+                            <!-- Destino (Muelle Hasta) -->
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <FontIcon Grid.Column="0" 
+                          Glyph="&#xE81C;" 
+                          FontFamily="Segoe MDL2 Assets" 
+                          FontSize="16" 
+                          Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}" 
+                          Margin="12,0" 
+                          VerticalAlignment="Center"/>
+                        <!-- MUELLE ORIGEN -->
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding From.Name}" 
+                               FontSize="14" 
+                               TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding From.Via.PrettyName}" 
+                               FontSize="12" 
+                               Foreground="Gray" 
+                               TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+
+                        <!-- FLECHA / ICONO DE CONEXIÓN -->
+                        <FontIcon Grid.Column="2" 
+                          Glyph="&#xE72A;" 
+                          FontFamily="Segoe MDL2 Assets" 
+                          FontSize="16" 
+                          Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}" 
+                          Margin="12,0" 
+                          VerticalAlignment="Center"/>
+
+                        <!-- MUELLE DESTINO -->
+                        <StackPanel Grid.Column="3" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding To.Name}" 
+                               FontSize="14" 
+                               TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding To.Via.PrettyName}" 
+                               FontSize="12" 
+                               Foreground="Gray" 
+                               TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
     </Grid>
     <Page.BottomAppBar>
         <CommandBar>
-            <AppBarButton x:Name="NotifyMeBtn" Icon="Clock" Label="Avisarme" Visibility="Collapsed" Click="AppBarButton_Click" />
+            <AppBarButton x:Name="DeleteShortcutBtn" Visibility="Collapsed" Icon="Delete" Label="Quitar de favoritos" Click="DeleteShortcutBtn_Click" />
+            <AppBarButton x:Name="AddShortcutBtn" Visibility="Collapsed" Icon="OutlineStar" Label="Guardar viaje" Click="AddShortcutBtn_Click" />
+            <AppBarButton x:Name="NotifyMeBtn" Icon="Comment" Label="Avisarme" Visibility="Collapsed" Click="AppBarButton_Click" />
             <AppBarButton Icon="Switch" Label="Invertir" Click="SwitchDocks_Click"/>
             <AppBarButton Icon="Find" Label="Buscar" Click="SearchNextTrip_Click"/>
         </CommandBar>

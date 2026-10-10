@@ -108,7 +108,7 @@ namespace La_Colectiva.Services.Local.Databases.Impl
                 .TotalElements(totalElements);
         }
 
-        private async Task PopulateVias(List<DockDto> docks)
+        public async Task PopulateVias(List<DockDto> docks)
         {
             if (docks == null || !docks.Any()) return;
             

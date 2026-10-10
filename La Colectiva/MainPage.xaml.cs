@@ -1,14 +1,17 @@
 ﻿using La_Colectiva.Core;
 using La_Colectiva.Models.Classic;
+using La_Colectiva.Models.Local;
 using La_Colectiva.Models.Queries;
 using La_Colectiva.Services.Classic;
 using La_Colectiva.Services.Local;
+using La_Colectiva.Services.Local.Databases;
 using La_Colectiva.Services.Queries;
 using La_Colectiva.Views.Dialogs;
 using La_Colectiva.Views.Pages;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -34,6 +37,10 @@ namespace La_Colectiva
         private readonly DockService _dockService;
         private readonly TripService _tripService = App.Current.Services.GetRequiredService<TripService>();
         private readonly TripReminderService _trs = App.Current.Services.GetRequiredService<TripReminderService>();
+        private readonly TripShortcutRepository tripShortcutRepository = App.Current.Services.GetRequiredService<TripShortcutRepository>();
+
+
+        private ObservableCollection<TripShortcut> Shortcuts { get; set; } = new ObservableCollection<TripShortcut>();
 
         private bool _isDialogOpen = false;
 
@@ -55,6 +62,7 @@ namespace La_Colectiva
             get { return _from;  }
             set {
                 _from = value;
+                OnAnyDockChange();
             }
         }
 
@@ -63,6 +71,18 @@ namespace La_Colectiva
             get { return _to; }
             set {
                 _to = value;
+                OnAnyDockChange();
+            }
+        }
+
+        public void OnAnyDockChange() {
+            if(From != null && To != null)
+            {
+                _ = EjecutarBusqueda();
+                this.AddShortcutBtn.Visibility = Visibility.Visible;
+            } else
+            {
+                this.AddShortcutBtn.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -91,6 +111,49 @@ namespace La_Colectiva
             }
         }
 
+        private void ShowShortcuts()
+        {
+            TripShortcutListBox.Visibility = Visibility.Visible;
+            LstTrips.Visibility = Visibility.Collapsed;
+        }
+
+        private void HideShortcuts()
+        {
+            TripShortcutListBox.Visibility = Visibility.Collapsed;
+            LstTrips.Visibility = Visibility.Visible;
+        }
+
+        private async Task LoadShortcuts() {
+            var items = await tripShortcutRepository.List();
+            Shortcuts.Clear();
+            var processed = items.Select(TripShortcut.Mapper).ToList();
+            foreach (var s in processed)
+            {
+                Shortcuts.Add(s);
+            }
+            TripShortcutListBox.ItemsSource = Shortcuts;
+            return;
+        }
+        private async Task AddShortcut()
+        {
+            if (From == null || To == null) return;
+            var obj = new TripShortcutDto(From.Id, To.Id);
+            obj.From = From.Raw;
+            obj.To = To.Raw;
+            await tripShortcutRepository.Save(obj);
+            await LoadShortcuts();
+            
+
+        }
+        private async Task RemoveSelectedShortcut()
+        {
+            if(TripShortcutListBox.SelectedItem is TripShortcut selected)
+            {
+                await tripShortcutRepository.Delete(selected.From.Id, selected.To.Id);
+                await LoadShortcuts();
+            }
+        }
+
         private async Task EjecutarBusqueda()
         {
             Loading = true;
@@ -109,6 +172,7 @@ namespace La_Colectiva
                 .FindNextTrip(request)
                 .Ok(result =>
                 {
+                    HideShortcuts();
                     LstTrips.ItemsSource = result;
                     Loading = false;
                 })
@@ -139,6 +203,7 @@ namespace La_Colectiva
             DataContext = this;
             _dockService = App.Current.Services.GetRequiredService<DockService>();
             Loading = false;
+            _ = LoadShortcuts();
         }
 
         protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -151,6 +216,7 @@ namespace La_Colectiva
         {
             if (From == null || To == null)
             {
+                ShowShortcuts();
                 return;
             }
 
@@ -189,6 +255,31 @@ namespace La_Colectiva
             if (LstTrips.SelectedItem is NextTrip selectedTrip)
             {
                 _trs.SaveAndScheduleReminder(selectedTrip, Date?.DateTime ?? DateTime.Now.Date);
+            }
+        }
+
+        private void AddShortcutBtn_Click(object sender, RoutedEventArgs e)
+        {
+            _ = AddShortcut();
+        }
+
+        private async void DeleteShortcutBtn_Click(object sender, RoutedEventArgs e)
+        {
+            _ = RemoveSelectedShortcut();
+        }
+
+        private void TripShortcutListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if(TripShortcutListBox.SelectedItem is TripShortcut selected)
+            {
+                DeleteShortcutBtn.Visibility = Visibility.Visible;
+                From = selected.From;
+                To = selected.To;
+                this.Bindings.Update();
+                SearchTrips();
+            } else
+            {
+                DeleteShortcutBtn.Visibility = Visibility.Collapsed;
             }
         }
     }

@@ -145,6 +145,7 @@
     <Compile Include="Models\Classic\Schedule.cs" />
     <Compile Include="Models\Classic\Tide.cs" />
     <Compile Include="Models\Classic\Via.cs" />
+    <Compile Include="Models\Local\TripShortcut.cs" />
     <Compile Include="Models\Queries\NextTrip.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\Api\ApiService.cs" />
@@ -163,8 +164,10 @@
     <Compile Include="Services\Local\Databases\DockRepository.cs" />
     <Compile Include="Services\Local\Databases\Impl\DatabaseServiceImpl.cs" />
     <Compile Include="Services\Local\Databases\Impl\DockRepositoryImpl.cs" />
+    <Compile Include="Services\Local\Databases\Impl\TripShortcutRepositoryImpl.cs" />
     <Compile Include="Services\Local\Databases\Impl\ViaRepositoryImpl.cs" />
     <Compile Include="Services\Local\Databases\LocalRepository.cs" />
+    <Compile Include="Services\Local\Databases\TripShortcutRepository.cs" />
     <Compile Include="Services\Local\Databases\ViaRepository.cs" />
     <Compile Include="Services\Local\Impl\TileServiceImpl.cs" />
     <Compile Include="Services\Local\Impl\TripReminderServiceImpl.cs" />

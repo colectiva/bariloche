@@ -11,6 +11,7 @@ namespace La_Colectiva.Services.Local
     {
 
         void UpdatePrimaryTile(NetworkStation station);
-
+        Task UpdateTileFromBackgroundAsync();
+        Task RegisterAndRunTileTaskAsync(NetworkStation station);
     }
 }
